@@ -1,62 +1,217 @@
-class Cube {
-        constructor() {
-            this.type = 'cube';
-            //this.position = [0.0, 0.0, 0.0];
-            this.color = [1.0, 0.0, 0.0, 1.0];
-            //this.size = 10;
-            //this.segments = 10;
-            this.matrix = new Matrix4();
-        }
-    
-        render() {
-            console.log('rendering a cube!');
-            //var xy = this.position;
-            var rgba = this.color;
-            //var rad = this.size;
-    
-            // Pass the color
-            gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
+class Dodec {
+    constructor() {
+        this.type = 'dodec';
+        //this.position = [0.0, 0.0, 0.0];
+        this.color = [1.0, 0.0, 0.0, 1.0];
+        //this.size = 10;
+        //this.segments = 10;
+        this.matrix = new Matrix4();
 
-            // Pass the matrix to u_ModelMatrix attribute
-            gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
-    
-            // Draw
-            /**var d = this.size/200.0;
-    
-            let angleStep = 360/this.segments;
-            for (var angle = 0; angle < 360; angle += angleStep) {
-                let centerPt = [xy[0], xy[1]];
-                let angle1 = angle;
-                let angle2 = angle + angleStep;
-                let vec1 = [Math.cos(angle1*Math.PI/180)*d, Math.sin(angle1*Math.PI/180)*d];
-                let vec2 = [Math.cos(angle2*Math.PI/180)*d, Math.sin(angle2*Math.PI/180)*d];
-                let pt1 = [centerPt[0] + vec1[0], centerPt[1]+vec1[1]];
-                let pt2 = [centerPt[0] + vec2[0], centerPt[1]+vec2[1]];
-    
-                drawTriangle( [xy[0], xy[1], pt1[0], pt1[1], pt2[0], pt2[1]] );
-            } **/
-
-            // Cube face
-            drawTriangle3D( [0.0,0.0,0.0, 1.0,1.0,0.0, 1.0,0.0,0.0] )
-            drawTriangle3D( [0.0,0.0,0.0, 0.0,1.0,0.0, 1.0,1.0,0.0] )
-
-            // Darkened sides
-            gl.uniform4f(u_FragColor, rgba[0]*0.9, rgba[1]*0.9, rgba[2]*0.9, rgba[3]);
-            drawTriangle3D( [0.0,1.0,0.0, 1.0,1.0,1.0, 0.0,1.0,1.0] )
-            drawTriangle3D( [0.0,1.0,0.0, 1.0,1.0,0.0, 1.0,1.0,1.0] )
-
-            drawTriangle3D( [0.0,0.0,0.0, 0.0,1.0,1.0, 0.0,0.0,1.0] )
-            drawTriangle3D( [0.0,0.0,0.0, 0.0,1.0,0.0, 0.0,1.0,1.0] )
-
-            drawTriangle3D( [1.0,0.0,0.0, 1.0,1.0,1.0, 1.0,0.0,1.0] )
-            drawTriangle3D( [1.0,0.0,0.0, 1.0,1.0,0.0, 1.0,1.0,1.0] )
-
-            drawTriangle3D( [0.0,0.0,0.0, 1.0,0.0,1.0, 1.0,0.0,0.0] )
-            drawTriangle3D( [0.0,0.0,0.0, 0.0,0.0,1.0, 1.0,0.0,1.0] )
-
-            // Darkest back
-            gl.uniform4f(u_FragColor, rgba[0]*0.8, rgba[1]*0.8, rgba[2]*0.8, rgba[3]);
-            drawTriangle3D( [0.0,0.0,1.0, 1.0,1.0,1.0, 1.0,0.0,1.0] )
-            drawTriangle3D( [0.0,0.0,1.0, 0.0,1.0,1.0, 1.0,1.0,1.0] )
-        }
+        this.rotateFaceDown();
     }
+
+    render() {
+        //var xy = this.position;
+        var rgba = this.color;
+        //var rad = this.size;
+
+        // Pass the color
+        gl.uniform4f(u_FragColor, rgba[0]*1.1, rgba[1]*1.1, rgba[2]*1.1, rgba[3]);
+
+        // Pass the matrix to u_ModelMatrix attribute
+        gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
+
+        // Create vertices
+        var a = [1.0, 1.0, 1.0];
+        var b = [-1.0, 1.0, 1.0];
+        var c = [1.0, -1.0, 1.0];
+        var d = [1.0, 1.0, -1.0];
+        var e = [-1.0, -1.0, 1.0];
+        var f = [1.0, -1.0, -1.0];
+        var g = [-1.0, 1.0, -1.0];
+        var h = [-1.0, -1.0, -1.0];
+
+        var phi = (1 + Math.sqrt(5)) / 2
+        var i = [0.0, phi, 1.0/phi];
+        var j = [0.0, -phi, 1.0/phi];
+        var k = [0.0, phi, -1.0/phi];
+        var l = [0.0, -phi, -1.0/phi];
+
+        var m = [1.0/phi, 0.0, phi];
+        var n = [1.0/phi, 0.0, -phi];
+        var o = [-1.0/phi, 0.0, phi];
+        var p = [-1.0/phi, 0.0, -phi];
+
+        var q = [phi, 1.0/phi, 0.0];
+        var r = [-phi, 1.0/phi, 0.0];
+        var s = [phi, -1.0/phi, 0.0];
+        var t = [-phi, -1.0/phi, 0.0];
+
+        // Draw and slightly shade
+
+        // face 1
+        this.drawPentagon3D(m, o, b, i, a);
+
+        // face 2 gl.uniform4f(u_FragColor, 0, 1, 0, rgba[3]); 
+        gl.uniform4f(u_FragColor, rgba[0]*1.05, rgba[1]*1.05, rgba[2]*1.05, rgba[3]); 
+        this.drawPentagon3D(m, a, q, s, c);
+
+        // face 3 gl.uniform4f(u_FragColor, 0, 0, 1, rgba[3]); 
+        gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]); 
+        this.drawPentagon3D(m, c, j, e, o);
+
+        // face 4 gl.uniform4f(u_FragColor, 1, 1, 1, rgba[3]);
+        gl.uniform4f(u_FragColor, rgba[0]*.95, rgba[1]*.95, rgba[2]*.95, rgba[3]);
+        this.drawPentagon3D(o, e, t, r, b);
+
+        // face 4 gl.uniform4f(u_FragColor, 0.1, 0.1, 0.1, rgba[3]);
+        gl.uniform4f(u_FragColor, rgba[0]*.90, rgba[1]*.90, rgba[2]*.90, rgba[3]);
+        this.drawPentagon3D(b, r, g, k, i);
+
+        // face 6 gl.uniform4f(u_FragColor, 1, 1, 0, rgba[3]);
+        gl.uniform4f(u_FragColor, rgba[0]*.85, rgba[1]*.85, rgba[2]*.85, rgba[3]);
+        this.drawPentagon3D(i, k, d, q, a);
+
+        // face 7 gl.uniform4f(u_FragColor, 1, 0, 1, rgba[3]);
+        gl.uniform4f(u_FragColor, rgba[0]*.80, rgba[1]*.80, rgba[2]*.80, rgba[3]);
+        this.drawPentagon3D(q, d, n, f, s);
+
+        // face 8 gl.uniform4f(u_FragColor, 0, 1, 1, rgba[3]);
+        gl.uniform4f(u_FragColor, rgba[0]*.75, rgba[1]*.75, rgba[2]*.75, rgba[3]);
+        this.drawPentagon3D(s, c, j, l, f);
+
+        // face 9 gl.uniform4f(u_FragColor, 1, 0.5, 0.5, rgba[3]);
+        gl.uniform4f(u_FragColor, rgba[0]*.70, rgba[1]*.70, rgba[2]*.70, rgba[3]);
+        this.drawPentagon3D(j, e, t, h, l);
+
+        // face 10 gl.uniform4f(u_FragColor, 0.5, 1, 0.5, rgba[3]);
+        gl.uniform4f(u_FragColor, rgba[0]*.65, rgba[1]*.65, rgba[2]*.65, rgba[3]);
+        this.drawPentagon3D(t, r, g, p, h);
+
+        // face 11 gl.uniform4f(u_FragColor, 0.5, 0.5, 1, rgba[3]);
+        gl.uniform4f(u_FragColor, rgba[0]*.60, rgba[1]*.60, rgba[2]*.60, rgba[3]);
+        this.drawPentagon3D(g, k, d, n, p);
+
+        // face 12 gl.uniform4f(u_FragColor, 0.5, 0.5, 0.5, rgba[3]);
+        gl.uniform4f(u_FragColor, rgba[0]*.55, rgba[1]*.55, rgba[2]*.55, rgba[3]);
+        this.drawPentagon3D(l, f, n, p, h);
+    }
+
+    drawPentagon3D(a, b, c, d, e) {
+        drawTriangle3D( a.concat(b.concat(c)) );
+        drawTriangle3D( a.concat(c.concat(d)) );
+        drawTriangle3D( a.concat(d.concat(e)) );
+    }
+
+    connectPart(parent, parentFaceId, scale = 1.0, dist) {
+        // Acquire face data from body matrices
+        const parentNorm = this.getFaceData(parentFaceId);
+
+        // Apply offset and rotation from parent
+        this.matrix = new Matrix4(parent);
+
+        // Scale
+        this.matrix.scale(scale, scale, scale);
+
+        // Push out along normal
+        const pushDistance = dist;
+        this.matrix.translate(
+            parentNorm.elements[0] * pushDistance,
+            parentNorm.elements[1] * pushDistance,
+            parentNorm.elements[2] * pushDistance
+        )
+    }
+
+    // Helper methods generated by ChatGPT, tweaked for my project:
+
+    rotateFaceDown() {
+        // Rotate shape for bottom face down
+        var phi = (1 + Math.sqrt(5)) / 2
+        var d = [1.0, 1.0, -1.0];
+        var g = [-1.0, 1.0, -1.0];
+        var k = [0.0, phi, -1.0/phi];
+    
+        // Extract edge vectors
+        var e1 = new Vector3( [k[0] - g[0], k[1] - g[1], k[2] - g[2]] );
+        var e2 = new Vector3( [d[0] - g[0], d[1] - g[1], d[2] - g[2]] );
+    
+        // Compute normal
+        var norm = Vector3.cross(e1, e2);
+    
+        // Normalize
+        norm.normalize();
+    
+        // Compute rotation axis
+        var down = new Vector3( [0, -1, 0] );
+        var axis = Vector3.cross(norm, down);
+        axis.normalize();
+    
+        // Compute rotation angle
+        var angle = Math.acos(Vector3.dot(norm, down)) * (180 / Math.PI);
+    
+        // Apply rotation
+        this.matrix.rotate(angle, axis.elements[0], axis.elements[1], axis.elements[2]);
+    }
+
+    getFaceData(face) {
+        // Create vertices
+        var vertices = [];
+        var a = [1.0, 1.0, 1.0];
+        var b = [-1.0, 1.0, 1.0];
+        var c = [1.0, -1.0, 1.0];
+        var d = [1.0, 1.0, -1.0];
+        var e = [-1.0, -1.0, 1.0];
+        var f = [1.0, -1.0, -1.0];
+        var g = [-1.0, 1.0, -1.0];
+        var h = [-1.0, -1.0, -1.0];
+
+        var phi = (1 + Math.sqrt(5)) / 2
+        var i = [0.0, phi, 1.0/phi];
+        var j = [0.0, -phi, 1.0/phi];
+        var k = [0.0, phi, -1.0/phi];
+        var l = [0.0, -phi, -1.0/phi];
+
+        var m = [1.0/phi, 0.0, phi];
+        var n = [1.0/phi, 0.0, -phi];
+        var o = [-1.0/phi, 0.0, phi];
+        var p = [-1.0/phi, 0.0, -phi];
+
+        var q = [phi, 1.0/phi, 0.0];
+        var r = [-phi, 1.0/phi, 0.0];
+        var s = [phi, -1.0/phi, 0.0];
+        var t = [-phi, -1.0/phi, 0.0];
+
+        switch(face) {
+            case 1: vertices = [m, o, b, i, a]; break;
+            case 2: vertices = [m, a, q, s, c]; break;
+            case 3: vertices = [m, c, j, e, o]; break;
+            case 4: vertices = [o, e, t, r, b]; break;
+            case 5: vertices = [b, r, g, k, i]; break;
+            case 6: vertices = [i, k, d, q, a]; break;
+            case 7: vertices = [q, d, n, f, s]; break;
+            case 8: vertices = [s, c, j, l, f]; break;
+            case 9: vertices = [j, e, t, h, l]; break;
+            case 10: vertices = [t, r, g, p, h]; break;
+            case 11: vertices = [g, k, d, n, p]; break;
+            case 12: vertices = [l, f, n, p, h]; break;
+        }
+
+        // Calculate face normal
+        const v1 = new Vector3([
+            vertices[1][0] - vertices[0][0],
+            vertices[1][1] - vertices[0][1],
+            vertices[1][2] - vertices[0][2]
+        ]);
+
+        const v2 = new Vector3([
+            vertices[2][0] - vertices[0][0],
+            vertices[2][1] - vertices[0][1],
+            vertices[2][2] - vertices[0][2]
+        ]);
+        
+        const normal = Vector3.cross(v1, v2);
+        if (face < 8 || face > 11) { normal.mul(-1) };
+
+        return normal;
+    }
+}
