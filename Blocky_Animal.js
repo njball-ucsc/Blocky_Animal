@@ -17,6 +17,7 @@ let g_rLegAng = 0;
 let g_lLegAng = 0;
 let g_time = 0;
 let g_prevTime = 0;
+let g_prevCast = 0;
 let g_animateJump = false;
 let g_animateSpell = false;
 
@@ -414,13 +415,25 @@ function renderAllShapes() {
     staffBottom.render();
 }
 
-function tick() {
+function tick(currentTime) {
+    // convert time to deal with change in refresh rates
+    currentTime *= 0.001;
+
+    // Initialize prevTime at first frame
+    if(g_prevTime === 0) {
+        g_prevTime = currentTime;
+    }
+
+    // Calculate time since last frame
+    const deltaTime = currentTime - g_prevTime;
+    g_prevTime = currentTime;
+
     if (g_animateJump) {
-        g_time += 1;
-        updateJumpAnimation();
+        g_time += deltaTime;
+        updateJumpAnimation(4.5);
     } else if (g_animateSpell) {
-        g_time += 1;
-        updateSpellAnimation();
+        g_time += deltaTime;
+        updateSpellAnimation(3.5);
     }
     requestAnimationFrame(tick);
 }
@@ -430,6 +443,7 @@ function resetAnimation() {
     g_animateSpell = false;
     g_time = 0;
     g_prevTime = 0;
+    g_prevCast = 0;
 
     g_headAng = g_rShoulderAng = g_lShoulderAng = g_rThighAng = g_lThighAng = g_rHandAng = g_lHandAng = g_rLegAng = g_lLegAng = g_xAngle = g_yAngle = 0;
     document.getElementById('headAng').value = 0;
@@ -447,13 +461,13 @@ function resetAnimation() {
     renderAllShapes();
 }
 
-function updateJumpAnimation() {
-    g_rShoulderAng = 45 * Math.cos(g_time * 0.03);
-    g_lShoulderAng = -45 * Math.cos(g_time * 0.03);
-    g_rThighAng = -45 * Math.cos(g_time * 0.03) + 45;
-    g_lThighAng = -45 * Math.cos(g_time * 0.03) + 45;
-    g_rLegAng = -45 * (-1 * Math.cos(g_time * 0.03)) - 45;
-    g_lLegAng = -45 * (-1 * Math.cos(g_time * 0.03)) -45;
+function updateJumpAnimation(speed) {
+    g_rShoulderAng = 45 * Math.cos(g_time * speed);
+    g_lShoulderAng = -45 * Math.cos(g_time * speed);
+    g_rThighAng = -45 * Math.cos(g_time * speed) + 45;
+    g_lThighAng = -45 * Math.cos(g_time * speed) + 45;
+    g_rLegAng = -45 * (-1 * Math.cos(g_time * speed)) - 45;
+    g_lLegAng = -45 * (-1 * Math.cos(g_time * speed)) -45;
 
     document.getElementById('rShoulderAng').value = g_rShoulderAng;
     document.getElementById('lShoulderAng').value = g_lShoulderAng;
@@ -465,12 +479,12 @@ function updateJumpAnimation() {
     renderAllShapes();
 }
 
-function updateSpellAnimation() {
-    g_headAng = 25 * Math.sin(g_time * 0.02);
-    g_rShoulderAng = 45 * Math.cos(g_time * 0.02);
-    g_lShoulderAng = 45 * Math.cos(g_time * 0.02);
-    g_rHandAng = -45 * Math.cos(g_time * 0.02) - 45;
-    g_lHandAng = -45 * (-1 * Math.cos(g_time * 0.02)) - 45;
+function updateSpellAnimation(speed) {
+    g_headAng = 25 * Math.sin(g_time * speed);
+    g_rShoulderAng = 45 * Math.cos(g_time * speed);
+    g_lShoulderAng = 45 * Math.cos(g_time * speed);
+    g_rHandAng = -45 * Math.cos(g_time * speed) - 45;
+    g_lHandAng = -45 * (-1 * Math.cos(g_time * speed)) - 45;
 
     document.getElementById('headAng').value = g_headAng;
     document.getElementById('rShoulderAng').value = g_rShoulderAng;
@@ -479,8 +493,8 @@ function updateSpellAnimation() {
     document.getElementById('lHandAng').value = g_lHandAng;
     
     renderAllShapes();
-    if (g_lHandAng <= -89 && (g_time - g_prevTime) > 100) {
-        g_prevTime = g_time;
+    if (g_lHandAng <= -89 && (g_time - g_prevCast) > 0.8) {
+        g_prevCast = g_time;
         createRandomGradient();
         // Possible special effect
         const effects = [
